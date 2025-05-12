@@ -27,7 +27,8 @@ resource "aws_internet_gateway" "RSP_IOT_igw" {
 }
 
 resource "aws_eip" "RSP_IOT_nat_eip" {
-  vpc = true
+  domain = "vpc"
+  #vpc = true
 }
 
 resource "aws_nat_gateway" "RSP_IOT_nat" {
