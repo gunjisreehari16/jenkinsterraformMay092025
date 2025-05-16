@@ -26,4 +26,8 @@ resource "aws_eip" "jump_server_eip" {
   domain     = "vpc"
   instance   = aws_instance.jump_server.id
   depends_on = [aws_internet_gateway.vzrsp_cicd_igw]
+
+  tags = {
+    Name = "Jump Server EIP"
+  }
 }
