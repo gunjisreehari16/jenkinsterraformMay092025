@@ -21,7 +21,7 @@ resource "aws_instance" "Jenkins_slave" {
   depends_on                  = [aws_instance.jenkins_master, aws_nat_gateway.vzrsp_cicd_nat]
 
   root_block_device {
-    volume_size = 30
+    volume_size = 50
     volume_type = "gp3"
   }
 
