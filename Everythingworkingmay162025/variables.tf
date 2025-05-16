@@ -28,15 +28,15 @@ variable "availability_zones" {
 
 variable "jenkins_ami" {
   description = "AMI ID for Jenkins master and slave"
-  default     = "ami-0e35ddab05955cf57"
+  default     = "ami-0af9569868786b23a"
 }
 
 variable "jenkins_master_instance_type" {
-  default = "t2.medium"
+  default = "t3.medium"
 }
 
 variable "jenkins_slave_instance_type" {
-  default = "t2.micro"
+  default = "t3.micro"
 }
 
 variable "key_name" {
@@ -51,11 +51,11 @@ variable "jenkins_slave_count" {
 variable "jump_server_ami" {
   description = "AMI ID for the Jump Server"
   type        = string
-  default     = "ami-0e35ddab05955cf57"
+  default     = "ami-0af9569868786b23a"
 }
 
 variable "jump_server_instance_type" {
   description = "Instance type for Jump Server"
   type        = string
-  default     = "t2.micro"
+  default     = "t3.micro"
 }
