@@ -1,17 +1,55 @@
 #!/bin/bash
 set -xe
 
-# Prereqs
-sudo apt update -y
-sudo apt install -y openjdk-21-jre curl wget unzip jq
+# Check if curl is already installed. If not, install it
+if ! command -v curl &> /dev/null; then
+    echo "curl not found, installing..."
+    sudo yum install -y curl || { echo "Failed to install curl, exiting."; exit 1; }
+else
+    echo "curl is already installed."
+fi
+
+# Install other dependencies: wget, unzip, and jq
+echo "Installing dependencies..."
+sudo yum install -y \
+    wget \
+    unzip \
+    jq
+
+# Try installing Amazon Corretto 17
+if sudo yum install -y java-17-amazon-corretto; then
+  echo "Amazon Corretto 17 installed successfully."
+else
+  echo "Failed to install Amazon Corretto 17. Trying OpenJDK 11..."
+  if sudo yum install -y java-11-openjdk; then
+    echo "OpenJDK 11 installed successfully."
+  else
+    echo "Failed to install OpenJDK 11. Trying OpenJDK 8..."
+    sudo yum install -y java-1.8.0-openjdk-devel || { echo "Failed to install Java, exiting."; exit 1; }
+  fi
+fi
+
+# Fix /tmp disk space issue (remount from disk instead of tmpfs)
+# Fix /tmp disk space issue (avoid tmpfs usage)
+echo "🔧 Checking if /tmp is tmpfs and replacing it if needed..."
+if mount | grep -qE '/tmp type tmpfs'; then
+  echo "⚠️ /tmp is on tmpfs. Using /var/tmp_disk instead..."
+  sudo mkdir -p /var/tmp_disk
+  sudo chmod 1777 /var/tmp_disk
+  sudo mount --bind /var/tmp_disk /tmp
+  echo "✅ /tmp is now mounted from /var/tmp_disk"
+else
+  echo "✅ /tmp is already on disk. No remount needed."
+fi
+
 
 # Jenkins connection config
 JENKINS_URL="${jenkins_url}"
 SLAVE_NAME="${slave_name}"   # Passed from Terraform
 JENKINS_USER="admin"
 JENKINS_PASS="admin"
-WORKDIR="/home/ubuntu/jenkins-agent"
-MAX_RETRIES=30
+WORKDIR="/home/ec2-user/jenkins-agent"
+MAX_RETRIES=60  # Increased retries
 
 # Wait for Jenkins master to be ready
 count=0
@@ -35,9 +73,9 @@ done
 
 # Prepare work directory
 mkdir -p "$WORKDIR/remoting"
-chown -R ubuntu:ubuntu "$WORKDIR"
+chown -R ec2-user:ec2-user "$WORKDIR"
 chmod -R 755 "$WORKDIR"
-cd /home/ubuntu
+cd /home/ec2-user
 
 # Download Jenkins agent JAR
 wget -q "$JENKINS_URL/jnlpJars/agent.jar" -O agent.jar
@@ -52,7 +90,7 @@ SECRET=$(curl -sL -u "$JENKINS_USER:$JENKINS_PASS" \
 # Start the Jenkins agent using new style args
 LOG_FILE="/var/log/jenkins-agent.log"
 sudo touch "$LOG_FILE"
-sudo chown ubuntu:ubuntu "$LOG_FILE"
+sudo chown ec2-user:ec2-user "$LOG_FILE"
 chmod 644 "$LOG_FILE"
 
 nohup java -jar agent.jar \
