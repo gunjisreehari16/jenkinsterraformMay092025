@@ -1,0 +1,22 @@
+# Ignore Terraform directories and lock files
+.terraform/
+.terraform.lock.hcl
+
+# Ignore Terraform provider binaries and metadata
+.terraform/providers/
+
+# Ignore local environment files
+*.tfstate
+*.tfstate.backup
+
+# Ignore Terraform plan files
+*.plan
+
+# Ignore crash logs (if any)
+crash.log
+
+# Ignore editor backup files
+*.swp
+# Ignore large Terraform provider binary file
+Everythingworkingmay162025/.terraform/providers/registry.opentofu.org/hashicorp/aws/5.98.0/linux_amd64/terraform-provider-aws
+
