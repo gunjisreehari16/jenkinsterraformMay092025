@@ -65,7 +65,7 @@ else
   exit 1
 fi
 
-# Jenkins IP injected by Terraform
+# Jenkins IP injected by Terraform or passed as an environment variable
 JENKINS_IP="${JENKINS_IP}"
 
 # Wait for Jenkins to be ready (optional)
@@ -91,9 +91,19 @@ server {
     listen 8080;
 
     location / {
-        proxy_pass http://${JENKINS_IP}:8080;
+        proxy_pass http://${JENKINS_IP}:8080;  # Pass to the correct internal Jenkins IP/port
+
+        # Important headers to pass through
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-Port \$server_port;
+        proxy_set_header X-Forwarded-Host \$host;
+        proxy_set_header X-Forwarded-Ssl on;  # If using SSL
+
+        proxy_http_version 1.1;
+        proxy_request_buffering off;
     }
 
     access_log /var/log/nginx/jenkins_access.log;

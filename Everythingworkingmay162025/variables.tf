@@ -59,3 +59,15 @@ variable "jump_server_instance_type" {
   type        = string
   default     = "t3.micro"
 }
+
+variable "gitlab_ami" {
+  description = "AMI ID for the Jump Server"
+  type        = string
+  default     = "ami-0af9569868786b23a"
+}
+
+variable "gitlab_instance_type" {
+  description = "Instance type for Jump Server"
+  type        = string
+  default     = "t3.large"
+}
